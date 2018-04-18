@@ -75,12 +75,6 @@ public class MainActivity extends AppCompatActivity
 
     private static final int REQUEST_PICK_IMAGE = 1;
     private ImageButton mImageButton;
-
-    @Override
-    public void onLoadComplete() {
-        mProgressBar.setVisibility(ProgressBar.INVISIBLE);
-    }
-
     private static final String TAG = "MainActivity";
     public static final String MESSAGES_CHILD = "messages";
     private static final int REQUEST_INVITE = 1;
@@ -174,15 +168,14 @@ public class MainActivity extends AppCompatActivity
         mSendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                sendMessageOnClick();
+                sendMessageOnClick(false);
             }
         });
 
         mSendButton.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                sendMessageOnClick();
-                animateBackground();
+                sendMessageOnClick(true);
                 return false;
             }
         });
@@ -202,27 +195,44 @@ public class MainActivity extends AppCompatActivity
                 loadMap();
             }
         });
+
+        mSendButton.setEnabled(false);
     }
 
-    private void animateBackground() {
-//        mImageView.setImageResource(R.drawable.heart);
+    public void animateBackground() {
+        mImageView.clearAnimation();
         Animation animation = new AlphaAnimation(1, 0);
         animation.setDuration(1000);
         animation.setInterpolator(new LinearInterpolator());
-        animation.setRepeatCount(5);
-//        animation.setRepeatMode(Animation.REVERSE);
-//        animation.
+        animation.setRepeatCount(3);
+        animation.setRepeatMode(Animation.REVERSE);
+        animation.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+                mImageView.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                mImageView.setVisibility(View.INVISIBLE);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
         mImageView.startAnimation(animation);
     }
 
-    private void sendMessageOnClick(){
+    private void sendMessageOnClick(boolean animateBackgroundHear){
         // Send messages on click.
         mMessageRecyclerView.scrollToPosition(0);
         ChatMessage chatMessage = new
                 ChatMessage(ChatHubApplication.getEncryptionHelper()
                 .encrypt(mMessageEditText.getText().toString()),
                 mUsername,
-                mPhotoUrl);
+                mPhotoUrl, animateBackgroundHear);
 
         MessageUtil.send(chatMessage);
         mMessageEditText.setText("");
@@ -382,10 +392,16 @@ public class MainActivity extends AppCompatActivity
                 ChatMessage chatMessage = new
                         ChatMessage(mMessageEditText.getText().toString(),
                         mUsername,
-                        mPhotoUrl, imageReference.toString());
+                        mPhotoUrl, imageReference.toString(), false);
                 MessageUtil.send(chatMessage);
                 mMessageEditText.setText("");
             }
         });
     }
+
+    @Override
+    public void onLoadComplete() {
+        mProgressBar.setVisibility(ProgressBar.INVISIBLE);
+    }
+
 }

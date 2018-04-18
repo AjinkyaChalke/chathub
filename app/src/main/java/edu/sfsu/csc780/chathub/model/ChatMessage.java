@@ -21,19 +21,21 @@ public class ChatMessage {
     private String name;
     private String photoUrl;
     private String imageUrl;
+    private boolean animateBackgroundHeart = false;
 
     public ChatMessage() {
     }
 
-    public ChatMessage(String text, String name, String photoUrl) {
+    public ChatMessage(String text, String name, String photoUrl, boolean animateBackgroundHeart) {
         this.text = text;
         this.name = name;
         this.photoUrl = photoUrl;
+        this.animateBackgroundHeart = animateBackgroundHeart;
     }
 
     public ChatMessage(String text, String name, String photoUrl,
-                       String imageUrl) {
-        this(text, name, photoUrl);
+                       String imageUrl, boolean animateBackgroundHeart) {
+        this(text, name, photoUrl, animateBackgroundHeart);
         this.imageUrl = imageUrl;
     }
 
@@ -69,7 +71,11 @@ public class ChatMessage {
         this.imageUrl = imageUrl;
     }
 
+    public Boolean getAnimateBackgroundHeart() {
+        return animateBackgroundHeart;
+    }
 
-
-
+    public void setAnimateBackgroundHeart(Boolean animateBackgroundHeart) {
+        this.animateBackgroundHeart = animateBackgroundHeart;
+    }
 }
