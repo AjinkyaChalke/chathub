@@ -55,6 +55,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import edu.sfsu.csc780.chathub.ChatHubApplication;
 import edu.sfsu.csc780.chathub.ImageUtil;
 import edu.sfsu.csc780.chathub.LocationUtils;
 import edu.sfsu.csc780.chathub.MapLoader;
@@ -170,7 +171,8 @@ public class MainActivity extends AppCompatActivity
                 // Send messages on click.
                 mMessageRecyclerView.scrollToPosition(0);
                 ChatMessage chatMessage = new
-                        ChatMessage(mMessageEditText.getText().toString(),
+                        ChatMessage(ChatHubApplication.getEncryptionHelper()
+                        .encrypt(mMessageEditText.getText().toString()),
                         mUsername,
                         mPhotoUrl);
 
