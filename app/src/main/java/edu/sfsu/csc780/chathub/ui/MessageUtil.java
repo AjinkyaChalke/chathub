@@ -9,6 +9,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -57,6 +58,14 @@ public class MessageUtil {
                 R.layout.item_message,
                 MessageViewHolder.class,
                 sFirebaseDatabaseReference.child(MESSAGES_CHILD)) {
+
+            @Override
+            public MessageViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+                MessageViewHolder messageViewHolder  = super.onCreateViewHolder(parent, viewType);
+                messageViewHolder.setMessageLoadAdapterListener(sAdapterListener);
+                return messageViewHolder;
+
+            }
 
             @Override
             protected void populateViewHolder(final MessageViewHolder viewHolder,
@@ -115,6 +124,9 @@ public class MessageUtil {
                     viewHolder.messageImageView.setVisibility(View.GONE);
                     viewHolder.messageTextView.setVisibility(View.VISIBLE);
                 }
+                if(chatMessage.getAnimateBackgroundHeart()){
+                    viewHolder.messageInformTextView.setVisibility(View.VISIBLE);
+                }
                 sAdapterListener.animateBackground(chatMessage.getAnimateBackgroundHeart());
             }
         };
@@ -133,7 +145,6 @@ public class MessageUtil {
                 }
             }
         });
-
         return adapter;
 
     }
@@ -156,16 +167,30 @@ public class MessageUtil {
         public TextView messengerTextView;
         public CircleImageView messengerImageView;
         public ImageView messageImageView;
+        public TextView messageInformTextView;
+        public MessageLoadListener messageLoadAdapterListener;
 
         public MessageViewHolder(View v) {
             super(v);
-            messageTextView = (TextView) itemView.findViewById(R.id.messageTextView);
-            messengerTextView = (TextView) itemView.findViewById(R.id.messengerTextView);
-            messengerImageView = (CircleImageView) itemView.findViewById(R.id.messengerImageView);
-            messageImageView = (ImageView) itemView.findViewById(R.id.messageImageView);
+            messageTextView =  itemView.findViewById(R.id.messageTextView);
+            messengerTextView = itemView.findViewById(R.id.messengerTextView);
+            messengerImageView =itemView.findViewById(R.id.messengerImageView);
+            messageImageView = itemView.findViewById(R.id.messageImageView);
+            messageInformTextView = itemView.findViewById(R.id.inform_effect);
+            v.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if(messageInformTextView.getVisibility() == View.VISIBLE){
+                        messageLoadAdapterListener.animateBackground(true);
+                    }
+                }
+            });
 
         }
 
+        public void setMessageLoadAdapterListener(MessageLoadListener messageLoadAdapterListener) {
+            this.messageLoadAdapterListener = messageLoadAdapterListener;
+        }
     }
     public static StorageReference getImageStorageReference(FirebaseUser user, Uri uri) {
         //Create a blob storage reference with path : bucket/userId/timeMs/filename
