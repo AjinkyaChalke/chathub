@@ -115,6 +115,10 @@ public class MessageUtil {
                     viewHolder.messageImageView.setVisibility(View.GONE);
                     viewHolder.messageTextView.setVisibility(View.VISIBLE);
                 }
+
+                if(chatMessage.getAnimateBackgroundHeart()){
+                    sAdapterListener.animateBackground();
+                }
             }
         };
 
@@ -144,7 +148,9 @@ public class MessageUtil {
     }
 
     public interface MessageLoadListener {
-        public void onLoadComplete();
+        void onLoadComplete();
+        void animateBackground();
+
     }
 
     public static class MessageViewHolder extends RecyclerView.ViewHolder {

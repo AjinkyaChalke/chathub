@@ -10,11 +10,20 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="edu.sfsu.csc780.chathub.ui.MainActivity">
 
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/backgroundImage"
+        android:background="@drawable/heart"
+        android:visibility="invisible"
+        />
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/messageRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@+id/linearLayout"/>
+        android:layout_above="@+id/linearLayout"
+        android:background="@null"/>
 
     <LinearLayout
         android:id="@+id/linearLayout"
@@ -62,7 +71,8 @@
                 android:id="@+id/sendButton"
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
-                android:src="@drawable/ic_send_black_24"/>
+                android:src="@drawable/ic_send_black_24"
+                />
         </LinearLayout>
 
     </LinearLayout>
