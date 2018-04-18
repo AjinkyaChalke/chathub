@@ -28,6 +28,7 @@ import com.google.firebase.storage.StorageReference;
 import java.util.Calendar;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import edu.sfsu.csc780.chathub.ChatHubApplication;
 import edu.sfsu.csc780.chathub.model.ChatMessage;
 import edu.sfsu.csc780.chathub.R;
 
@@ -35,32 +36,40 @@ public class MessageUtil {
 
     public static final String MESSAGES_CHILD = "messages";
     private static final String LOG_TAG = MessageUtil.class.getSimpleName();
-    private static DatabaseReference sFirebaseDatabaseReference = FirebaseDatabase.getInstance().getReference();
+    private static DatabaseReference sFirebaseDatabaseReference = FirebaseDatabase.getInstance()
+            .getReference();
 
     private static MessageLoadListener sAdapterListener;
 
     private static FirebaseAuth sFirebaseAuth;
     private static FirebaseStorage sStorage = FirebaseStorage.getInstance();
 
-    public static FirebaseRecyclerAdapter getFirebaseAdapter(final Activity activity, MessageLoadListener listener, final LinearLayoutManager linearManager, final RecyclerView recyclerView) {
+    public static FirebaseRecyclerAdapter getFirebaseAdapter(final Activity activity,
+                                                             MessageLoadListener listener,
+                                                             final LinearLayoutManager linearManager,
+                                                             final RecyclerView recyclerView) {
 
         sAdapterListener = listener;
 
-        final FirebaseRecyclerAdapter adapter = new FirebaseRecyclerAdapter<ChatMessage, MessageViewHolder>(
+        final FirebaseRecyclerAdapter adapter = new FirebaseRecyclerAdapter<ChatMessage,
+                MessageViewHolder>(
                 ChatMessage.class,
                 R.layout.item_message,
                 MessageViewHolder.class,
                 sFirebaseDatabaseReference.child(MESSAGES_CHILD)) {
 
             @Override
-            protected void populateViewHolder(final MessageViewHolder viewHolder, ChatMessage chatMessage, int position) {
+            protected void populateViewHolder(final MessageViewHolder viewHolder,
+                                              ChatMessage chatMessage, int position) {
 
                 sAdapterListener.onLoadComplete();
 
-                viewHolder.messageTextView.setText(chatMessage.getText());
+                viewHolder.messageTextView.setText(ChatHubApplication.getEncryptionHelper()
+                        .decrypt(chatMessage.getText()));
                 viewHolder.messengerTextView.setText(chatMessage.getName());
                 if (chatMessage.getPhotoUrl() == null) {
-                    viewHolder.messengerImageView.setImageDrawable(ContextCompat.getDrawable(activity, R.drawable.ic_account_circle_black_36dp));
+                    viewHolder.messengerImageView.setImageDrawable(ContextCompat
+                            .getDrawable(activity, R.drawable.ic_account_circle_black_36dp));
 
                 } else {
                     SimpleTarget target = new SimpleTarget<Bitmap>() {

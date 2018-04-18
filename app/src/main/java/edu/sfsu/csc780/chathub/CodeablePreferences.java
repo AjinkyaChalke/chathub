@@ -15,8 +15,9 @@
  */
 package edu.sfsu.csc780.chathub;
 
-public class CodelabPreferences {
+public class CodeablePreferences {
 
     public static final String MSG_LENGTH = "msg_length";
+    public static final String SECRET = "my_secret_key";
 
 }
