@@ -115,10 +115,7 @@ public class MessageUtil {
                     viewHolder.messageImageView.setVisibility(View.GONE);
                     viewHolder.messageTextView.setVisibility(View.VISIBLE);
                 }
-
-                if(chatMessage.getAnimateBackgroundHeart()){
-                    sAdapterListener.animateBackground();
-                }
+                sAdapterListener.animateBackground(chatMessage.getAnimateBackgroundHeart());
             }
         };
 
@@ -149,7 +146,7 @@ public class MessageUtil {
 
     public interface MessageLoadListener {
         void onLoadComplete();
-        void animateBackground();
+        void animateBackground(boolean bool);
 
     }
 

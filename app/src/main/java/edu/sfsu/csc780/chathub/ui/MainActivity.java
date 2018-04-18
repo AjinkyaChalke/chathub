@@ -199,35 +199,38 @@ public class MainActivity extends AppCompatActivity
         mSendButton.setEnabled(false);
     }
 
-    public void animateBackground() {
+    public void animateBackground(boolean bool) {
         mImageView.clearAnimation();
-        Animation animation = new AlphaAnimation(1, 0);
-        animation.setDuration(1000);
-        animation.setInterpolator(new LinearInterpolator());
-        animation.setRepeatCount(3);
-        animation.setRepeatMode(Animation.REVERSE);
-        animation.setAnimationListener(new Animation.AnimationListener() {
-            @Override
-            public void onAnimationStart(Animation animation) {
-                mImageView.setVisibility(View.VISIBLE);
-            }
+        if(bool){
 
-            @Override
-            public void onAnimationEnd(Animation animation) {
-                mImageView.setVisibility(View.INVISIBLE);
-            }
+            Animation animation = new AlphaAnimation(1, 0);
+            animation.setDuration(1000);
+            animation.setInterpolator(new LinearInterpolator());
+            animation.setRepeatCount(3);
+            animation.setRepeatMode(Animation.REVERSE);
+            animation.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+                    mImageView.setVisibility(View.VISIBLE);
+                }
 
-            @Override
-            public void onAnimationRepeat(Animation animation) {
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    mImageView.setVisibility(View.INVISIBLE);
+                }
 
-            }
-        });
-        mImageView.startAnimation(animation);
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+
+                }
+            });
+            mImageView.startAnimation(animation);
+        }
     }
 
     private void sendMessageOnClick(boolean animateBackgroundHear){
         // Send messages on click.
-        mMessageRecyclerView.scrollToPosition(0);
+        mMessageRecyclerView.scrollToPosition(-1);
         ChatMessage chatMessage = new
                 ChatMessage(ChatHubApplication.getEncryptionHelper()
                 .encrypt(mMessageEditText.getText().toString()),
