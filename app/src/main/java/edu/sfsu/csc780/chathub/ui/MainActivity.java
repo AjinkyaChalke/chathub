@@ -39,9 +39,14 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.LinearInterpolator;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
@@ -98,8 +103,8 @@ public class MainActivity extends AppCompatActivity
 
     private FirebaseRecyclerAdapter<ChatMessage, MessageUtil.MessageViewHolder> mFirebaseAdapter;
     private ImageButton mLocationButton;
-
     private Context mContext;
+    private ImageView mImageView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -164,20 +169,21 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
+        mImageView = (ImageView) findViewById(R.id.backgroundImage);
         mSendButton = (FloatingActionButton) findViewById(R.id.sendButton);
         mSendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // Send messages on click.
-                mMessageRecyclerView.scrollToPosition(0);
-                ChatMessage chatMessage = new
-                        ChatMessage(ChatHubApplication.getEncryptionHelper()
-                        .encrypt(mMessageEditText.getText().toString()),
-                        mUsername,
-                        mPhotoUrl);
+                sendMessageOnClick();
+            }
+        });
 
-                MessageUtil.send(chatMessage);
-                mMessageEditText.setText("");
+        mSendButton.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                sendMessageOnClick();
+                animateBackground();
+                return false;
             }
         });
 
@@ -196,6 +202,30 @@ public class MainActivity extends AppCompatActivity
                 loadMap();
             }
         });
+    }
+
+    private void animateBackground() {
+//        mImageView.setImageResource(R.drawable.heart);
+        Animation animation = new AlphaAnimation(1, 0);
+        animation.setDuration(1000);
+        animation.setInterpolator(new LinearInterpolator());
+        animation.setRepeatCount(5);
+//        animation.setRepeatMode(Animation.REVERSE);
+//        animation.
+        mImageView.startAnimation(animation);
+    }
+
+    private void sendMessageOnClick(){
+        // Send messages on click.
+        mMessageRecyclerView.scrollToPosition(0);
+        ChatMessage chatMessage = new
+                ChatMessage(ChatHubApplication.getEncryptionHelper()
+                .encrypt(mMessageEditText.getText().toString()),
+                mUsername,
+                mPhotoUrl);
+
+        MessageUtil.send(chatMessage);
+        mMessageEditText.setText("");
     }
 
     private void loadMap(){
