@@ -5,4 +5,5 @@
     <string name="contacts_permission_rationale">Access to account information is required to sign in.</string>
     <string name="sign_in">Sign In</string>
     <string name="message_sent_with_heart_effect">Message Sent with Heart Effect</string>
+    <string name="start_chat_head">Start chat head</string>
 </resources>

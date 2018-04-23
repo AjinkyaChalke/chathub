@@ -1,6 +1,7 @@
 package edu.sfsu.csc780.chathub.ui;
 
 import android.app.Activity;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.support.annotation.NonNull;
@@ -45,7 +46,7 @@ public class MessageUtil {
     private static FirebaseAuth sFirebaseAuth;
     private static FirebaseStorage sStorage = FirebaseStorage.getInstance();
 
-    public static FirebaseRecyclerAdapter getFirebaseAdapter(final Activity activity,
+    public static FirebaseRecyclerAdapter<ChatMessage, MessageUtil.MessageViewHolder> getFirebaseAdapter(final Context context,
                                                              MessageLoadListener listener,
                                                              final LinearLayoutManager linearManager,
                                                              final RecyclerView recyclerView) {
@@ -78,7 +79,7 @@ public class MessageUtil {
                 viewHolder.messengerTextView.setText(chatMessage.getName());
                 if (chatMessage.getPhotoUrl() == null) {
                     viewHolder.messengerImageView.setImageDrawable(ContextCompat
-                            .getDrawable(activity, R.drawable.ic_account_circle_black_36dp));
+                            .getDrawable(context, R.drawable.ic_account_circle_black_36dp));
 
                 } else {
                     SimpleTarget target = new SimpleTarget<Bitmap>() {
@@ -88,7 +89,7 @@ public class MessageUtil {
                         }
                     };
 
-                    Glide.with(activity)
+                    Glide.with(context)
                             .load(chatMessage.getPhotoUrl())
                             .asBitmap()
                             .into(target);
@@ -105,7 +106,7 @@ public class MessageUtil {
                         gsReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                             @Override
                             public void onSuccess(Uri uri) {
-                                Glide.with(activity)
+                                Glide.with(context)
                                         .load(uri)
                                         .into(viewHolder.messageImageView);
                             }
