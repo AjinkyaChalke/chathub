@@ -174,6 +174,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         mFirebaseAdapter = MessageUtil.getFirebaseAdapter(this,
+                this,
                 helpers,
                 mLinearLayoutManager,
                 mMessageRecyclerView);

@@ -154,6 +154,7 @@ public class ChatHeadService extends Service {
 
 
         mFirebaseAdapter = MessageUtil.getFirebaseAdapter(this,
+                null,
                 helpers,
                 mLinearLayoutManager,
                 mMessageRecyclerView);

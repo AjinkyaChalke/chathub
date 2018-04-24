@@ -46,10 +46,12 @@ public class MessageUtil {
     private static FirebaseAuth sFirebaseAuth;
     private static FirebaseStorage sStorage = FirebaseStorage.getInstance();
 
-    public static FirebaseRecyclerAdapter<ChatMessage, MessageUtil.MessageViewHolder> getFirebaseAdapter(final Context context,
-                                                             MessageLoadListener listener,
-                                                             final LinearLayoutManager linearManager,
-                                                             final RecyclerView recyclerView) {
+    public static FirebaseRecyclerAdapter<ChatMessage, MessageUtil.MessageViewHolder>
+    getFirebaseAdapter(final Context context,
+                       final Activity activity,
+                       MessageLoadListener listener,
+                       final LinearLayoutManager linearManager,
+                       final RecyclerView recyclerView) {
 
         sAdapterListener = listener;
 
@@ -89,10 +91,20 @@ public class MessageUtil {
                         }
                     };
 
-                    Glide.with(context)
-                            .load(chatMessage.getPhotoUrl())
-                            .asBitmap()
-                            .into(target);
+                    if(activity != null){
+                        Glide.with(activity)
+                                .load(chatMessage.getPhotoUrl())
+                                .asBitmap()
+                                .into(target);
+
+                    }
+                    else {
+
+                        Glide.with(context)
+                                .load(chatMessage.getPhotoUrl())
+                                .asBitmap()
+                                .into(target);
+                    }
 
                 }
                 if (chatMessage.getImageUrl() != null) {
@@ -106,9 +118,16 @@ public class MessageUtil {
                         gsReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                             @Override
                             public void onSuccess(Uri uri) {
-                                Glide.with(context)
-                                        .load(uri)
-                                        .into(viewHolder.messageImageView);
+                                if(activity != null){
+                                    Glide.with(activity)
+                                            .load(uri)
+                                            .into(viewHolder.messageImageView);
+                                }
+                                else{
+                                    Glide.with(context)
+                                            .load(uri)
+                                            .into(viewHolder.messageImageView);
+                                }
                             }
                         }).addOnFailureListener(new OnFailureListener() {
                             @Override
@@ -117,7 +136,7 @@ public class MessageUtil {
                             }
                         });
                     } catch (IllegalArgumentException e) {
-                        viewHolder.messageTextView.setText("Error loading image");
+                        viewHolder.messageTextView.setText(R.string.loading_error);
                         Log.e(LOG_TAG, e.getMessage() + " : " + chatMessage.getImageUrl());
                     }
                 } else {
