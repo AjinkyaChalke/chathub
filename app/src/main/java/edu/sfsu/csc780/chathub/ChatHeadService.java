@@ -51,7 +51,7 @@ public class ChatHeadService extends Service {
     private String mPhotoUrl;
     private SharedPreferences mSharedPreferences;
     private GoogleApiClient mGoogleApiClient;
-    private Button mSendButton;
+    private ImageButton mSendButton;
     private RecyclerView mMessageRecyclerView;
     private LinearLayoutManager mLinearLayoutManager;
     private ProgressBar mProgressBar;
@@ -210,6 +210,9 @@ public class ChatHeadService extends Service {
             }
         });
         closeButton.setVisibility(View.VISIBLE);
+
+        ImageButton shareImageButton = mChatHeadView.findViewById(R.id.shareImageButton);
+        shareImageButton.setVisibility(View.GONE);
     }
 
     private void sendMessageOnClick(boolean animateBackgroundHear){
@@ -232,7 +235,6 @@ public class ChatHeadService extends Service {
             mWindowManager.removeView(mChatHeadView);
         }
     }
-
 
     private View.OnTouchListener mOnTouchListener = new View.OnTouchListener() {
         private int initialX;
@@ -284,7 +286,6 @@ public class ChatHeadService extends Service {
             return false;
         }
     };
-
 
     private boolean isViewCollapsed() {
         return mChatHeadView == null || mCollapsedView.getVisibility() == View.VISIBLE;

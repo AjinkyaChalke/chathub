@@ -88,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
     private SharedPreferences mSharedPreferences;
     private GoogleApiClient mGoogleApiClient;
 
-    private Button mSendButton;
+    private ImageButton mSendButton;
     private RecyclerView mMessageRecyclerView;
     private LinearLayoutManager mLinearLayoutManager;
     private ProgressBar mProgressBar;
@@ -129,6 +129,12 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        stopChatHeadService();
+
+    }
+
+    private void stopChatHeadService() {
+        stopService(new Intent(MainActivity.this, ChatHeadService.class));
     }
 
     private void initialize() {

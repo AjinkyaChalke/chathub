@@ -36,10 +36,15 @@
 
     </RelativeLayout>
 
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/chat_head_expanded"
+        android:background="@color/chatMessageHeadBackground"
+        android:visibility="gone">
 
-    <include layout="@layout/activity_main"
-    android:id="@+id/chat_head_expanded"
-    android:visibility="gone"/>
+        <include layout="@layout/activity_main" />
 
+    </RelativeLayout>
 
 </FrameLayout>

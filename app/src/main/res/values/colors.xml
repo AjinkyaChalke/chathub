@@ -4,5 +4,6 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF9800</color>
     <color name="colorTitle">#212121</color>
+    <color name="chatMessageHeadBackground">#eeeeee</color>
 </resources>
 
