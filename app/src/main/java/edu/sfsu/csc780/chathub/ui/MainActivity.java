@@ -22,10 +22,11 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
@@ -42,6 +43,7 @@ import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -60,32 +62,33 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import edu.sfsu.csc780.chathub.ChatHeadService;
 import edu.sfsu.csc780.chathub.ChatHubApplication;
+import edu.sfsu.csc780.chathub.CodeablePreferences;
 import edu.sfsu.csc780.chathub.ImageUtil;
 import edu.sfsu.csc780.chathub.LocationUtils;
 import edu.sfsu.csc780.chathub.MapLoader;
 import edu.sfsu.csc780.chathub.R;
 import edu.sfsu.csc780.chathub.model.ChatMessage;
+import edu.sfsu.csc780.chathub.utils.Helpers;
 
 import static edu.sfsu.csc780.chathub.ImageUtil.savePhotoImage;
 import static edu.sfsu.csc780.chathub.ImageUtil.scaleImage;
 
-public class MainActivity extends AppCompatActivity
-        implements GoogleApiClient.OnConnectionFailedListener ,MessageUtil.MessageLoadListener{
+public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_PICK_IMAGE = 1;
     private ImageButton mImageButton;
     private static final String TAG = "MainActivity";
     public static final String MESSAGES_CHILD = "messages";
     private static final int REQUEST_INVITE = 1;
-    public static final int MSG_LENGTH_LIMIT = 10;
     public static final String ANONYMOUS = "anonymous";
     private String mUsername;
     private String mPhotoUrl;
     private SharedPreferences mSharedPreferences;
     private GoogleApiClient mGoogleApiClient;
 
-    private FloatingActionButton mSendButton;
+    private ImageButton mSendButton;
     private RecyclerView mMessageRecyclerView;
     private LinearLayoutManager mLinearLayoutManager;
     private ProgressBar mProgressBar;
@@ -100,11 +103,41 @@ public class MainActivity extends AppCompatActivity
     private Context mContext;
     private ImageView mImageView;
 
+    private static final int CODE_DRAW_OVER_OTHER_APP_PERMISSION = 2084;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mContext = this;
         setContentView(R.layout.activity_main);
+
+        initialize();
+
+        mImageButton = findViewById(R.id.shareImageButton);
+        mImageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pickImage();
+            }
+        });
+
+        mLocationButton = findViewById(R.id.locationButton);
+        mLocationButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                loadMap();
+            }
+        });
+
+        stopChatHeadService();
+
+    }
+
+    private void stopChatHeadService() {
+        stopService(new Intent(MainActivity.this, ChatHeadService.class));
+    }
+
+    private void initialize() {
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         // Set default username is anonymous.
         mUsername = ANONYMOUS;
@@ -122,28 +155,32 @@ public class MainActivity extends AppCompatActivity
             }
         }
 
+        mImageView =  findViewById(R.id.backgroundImage);
+        // Initialize ProgressBar and RecyclerView.
+        mProgressBar = findViewById(R.id.progressBar);
+        mProgressBar.setVisibility(ProgressBar.INVISIBLE);
+
+        Helpers helpers = new Helpers(this, mProgressBar, mImageView);
+
         mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
+                .enableAutoManage(this, helpers )
                 .addApi(Auth.GOOGLE_SIGN_IN_API)
                 .build();
 
-        // Initialize ProgressBar and RecyclerView.
-        mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
-        mMessageRecyclerView = (RecyclerView) findViewById(R.id.messageRecyclerView);
+        mMessageRecyclerView = findViewById(R.id.messageRecyclerView);
         mLinearLayoutManager = new LinearLayoutManager(this);
         mLinearLayoutManager.setStackFromEnd(true);
         mMessageRecyclerView.setLayoutManager(mLinearLayoutManager);
 
-        mProgressBar.setVisibility(ProgressBar.INVISIBLE);
 
         mFirebaseAdapter = MessageUtil.getFirebaseAdapter(this,
-                (MessageUtil.MessageLoadListener) this,
+                helpers,
                 mLinearLayoutManager,
                 mMessageRecyclerView);
         mMessageRecyclerView.setAdapter(mFirebaseAdapter);
 
-        mMessageEditText = (EditText) findViewById(R.id.messageEditText);
-        mMessageEditText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(MSG_LENGTH_LIMIT)});
+        mMessageEditText = findViewById(R.id.messageEditText);
+        mMessageEditText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(CodeablePreferences.MSG_LENGTH_LIMIT)});
         mMessageEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -163,8 +200,8 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        mImageView = (ImageView) findViewById(R.id.backgroundImage);
-        mSendButton = (FloatingActionButton) findViewById(R.id.sendButton);
+        mSendButton = findViewById(R.id.sendButton);
+        mSendButton.setEnabled(false);
         mSendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -180,52 +217,6 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        mImageButton = (ImageButton) findViewById(R.id.shareImageButton);
-        mImageButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                pickImage();
-            }
-        });
-
-        mLocationButton = (ImageButton) findViewById(R.id.locationButton);
-        mLocationButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                loadMap();
-            }
-        });
-
-        mSendButton.setEnabled(false);
-    }
-
-    public void animateBackground(boolean bool) {
-        mImageView.clearAnimation();
-        if(bool){
-
-            Animation animation = new AlphaAnimation(1, 0);
-            animation.setDuration(1000);
-            animation.setInterpolator(new LinearInterpolator());
-            animation.setRepeatCount(3);
-            animation.setRepeatMode(Animation.REVERSE);
-            animation.setAnimationListener(new Animation.AnimationListener() {
-                @Override
-                public void onAnimationStart(Animation animation) {
-                    mImageView.setVisibility(View.VISIBLE);
-                }
-
-                @Override
-                public void onAnimationEnd(Animation animation) {
-                    mImageView.setVisibility(View.INVISIBLE);
-                }
-
-                @Override
-                public void onAnimationRepeat(Animation animation) {
-
-                }
-            });
-            mImageView.startAnimation(animation);
-        }
     }
 
     private void sendMessageOnClick(boolean animateBackgroundHear){
@@ -281,37 +272,21 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        // Check if user is signed in.
-        // TODO: Add code to check if user is signed in.
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-    }
-
-    @Override
     public void onResume() {
         super.onResume();
         LocationUtils.startLocationUpdates(this);
     }
 
+
     @Override
     public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[],
-                                           int[] grantResults) {
+                                           @NonNull String permissions[],
+                                           @NonNull int[] grantResults) {
         boolean isGranted = (grantResults.length > 0
                 && grantResults[0] == PackageManager.PERMISSION_GRANTED);
         if (isGranted && requestCode == LocationUtils.REQUEST_CODE) {
             LocationUtils.startLocationUpdates(this);
         }
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
     }
 
     @Override
@@ -330,19 +305,30 @@ public class MainActivity extends AppCompatActivity
                 mUsername = ANONYMOUS;
                 startActivity(new Intent(this, SignInActivity.class));
                 return true;
+
+            case R.id.chat_head_option:
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)) {
+
+                    //If the draw over permission is not available open the settings screen
+                    //to grant the permission.
+                    Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                            Uri.parse("package:" + getPackageName()));
+                    startActivityForResult(intent, CODE_DRAW_OVER_OTHER_APP_PERMISSION);
+                } else {
+                    initializeChatHeadView();
+                }
+                return true;
+
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        // An unresolvable error has occurred and Google APIs (including Sign-In) will not
-        // be available.
-        Log.d(TAG, "onConnectionFailed:" + connectionResult);
-        Toast.makeText(this, "Google Play Services error.", Toast.LENGTH_SHORT).show();
+    private void initializeChatHeadView() {
+        startService(new Intent(MainActivity.this, ChatHeadService.class));
+        finish();
     }
-    
+
     private void pickImage() {
         // ACTION_OPEN_DOCUMENT is the intent to choose a file via the system's file browser
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
@@ -377,6 +363,19 @@ public class MainActivity extends AppCompatActivity
                 Log.e(TAG, "Cannot get image for uploading");
             }
         }
+        if (requestCode == CODE_DRAW_OVER_OTHER_APP_PERMISSION) {
+
+            //Check if the permission is granted or not.
+            if (resultCode == RESULT_OK) {
+                initializeChatHeadView();
+            } else { //Permission is not available
+                Toast.makeText(this,
+                        "Draw over other app permission not available. Closing the application",
+                        Toast.LENGTH_SHORT).show();
+
+                finish();
+            }
+        }
     }
 
     private void createImageMessage(Uri uri) {
@@ -400,11 +399,6 @@ public class MainActivity extends AppCompatActivity
                 mMessageEditText.setText("");
             }
         });
-    }
-
-    @Override
-    public void onLoadComplete() {
-        mProgressBar.setVisibility(ProgressBar.INVISIBLE);
     }
 
 }
