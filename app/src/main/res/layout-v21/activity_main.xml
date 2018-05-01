@@ -54,7 +54,7 @@
                 android:src="@drawable/ic_my_location_black_24px"
                 android:background="@drawable/button_ripple"
                 android:layout_gravity="center"
-                android:padding="16dp"
+                android:padding="5dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
 
@@ -63,15 +63,24 @@
                 android:src="@drawable/ic_image_black_24px"
                 android:background="@drawable/button_ripple"
                 android:layout_gravity="center"
-                android:padding="16dp"
+                android:padding="5dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
             <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/button_ripple"
+                android:id="@+id/speech_input"
+                android:src="@drawable/ic_speech_input"
+                android:padding="5dp"
+                android:visibility="visible"/>
+            <ImageButton
                 android:id="@+id/sendButton"
+                android:background="@drawable/button_ripple"
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
                 android:src="@drawable/ic_send_black_24"
-                android:padding="16dp"
+                android:padding="5dp"
                 />
         </LinearLayout>
 

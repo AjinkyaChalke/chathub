@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Build;
+import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
@@ -11,6 +13,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -28,13 +31,14 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.util.Calendar;
+import java.util.Locale;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import edu.sfsu.csc780.chathub.ChatHubApplication;
 import edu.sfsu.csc780.chathub.model.ChatMessage;
 import edu.sfsu.csc780.chathub.R;
 
-public class MessageUtil {
+public class MessageUtil{
 
     public static final String MESSAGES_CHILD = "messages";
     private static final String LOG_TAG = MessageUtil.class.getSimpleName();
@@ -42,7 +46,6 @@ public class MessageUtil {
             .getReference();
 
     private static MessageLoadListener sAdapterListener;
-
     private static FirebaseAuth sFirebaseAuth;
     private static FirebaseStorage sStorage = FirebaseStorage.getInstance();
 
@@ -75,9 +78,25 @@ public class MessageUtil {
                                               ChatMessage chatMessage, int position) {
 
                 sAdapterListener.onLoadComplete();
+                final String textMessage = ChatHubApplication.getEncryptionHelper()
+                        .decrypt(chatMessage.getText());
+                viewHolder.messageTextView.setText(textMessage);
+                viewHolder.mTextToSpeech.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        TextToSpeech ttsobj = ChatHubApplication.getChatHubApplication()
+                                .getsTextToSpeechObj();
+                        if(Build.VERSION.SDK_INT >= 21){
+                            ttsobj.speak(textMessage,TextToSpeech.QUEUE_FLUSH,null,null);
+                        }
+                        else{
+                            ttsobj.speak(textMessage,TextToSpeech.QUEUE_FLUSH,null);
+                        }
 
-                viewHolder.messageTextView.setText(ChatHubApplication.getEncryptionHelper()
-                        .decrypt(chatMessage.getText()));
+                    }
+
+                });
+
                 viewHolder.messengerTextView.setText(chatMessage.getName());
                 if (chatMessage.getPhotoUrl() == null) {
                     viewHolder.messengerImageView.setImageDrawable(ContextCompat
@@ -139,7 +158,8 @@ public class MessageUtil {
                         viewHolder.messageTextView.setText(R.string.loading_error);
                         Log.e(LOG_TAG, e.getMessage() + " : " + chatMessage.getImageUrl());
                     }
-                } else {
+                }
+                else {
                     //Set view visibilities for a text message
                     viewHolder.messageImageView.setVisibility(View.GONE);
                     viewHolder.messageTextView.setVisibility(View.VISIBLE);
@@ -189,6 +209,7 @@ public class MessageUtil {
         public ImageView messageImageView;
         public TextView messageInformTextView;
         public MessageLoadListener messageLoadAdapterListener;
+        public ImageButton mTextToSpeech;
 
         public MessageViewHolder(View v) {
             super(v);
@@ -206,12 +227,14 @@ public class MessageUtil {
                 }
             });
 
+            mTextToSpeech = itemView.findViewById(R.id.text_to_speech);
         }
 
         public void setMessageLoadAdapterListener(MessageLoadListener messageLoadAdapterListener) {
             this.messageLoadAdapterListener = messageLoadAdapterListener;
         }
     }
+
     public static StorageReference getImageStorageReference(FirebaseUser user, Uri uri) {
         //Create a blob storage reference with path : bucket/userId/timeMs/filename
         long nowMs = Calendar.getInstance().getTimeInMillis();

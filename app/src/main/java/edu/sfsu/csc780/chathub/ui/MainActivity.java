@@ -16,6 +16,7 @@
 package edu.sfsu.csc780.chathub.ui;
 
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -26,6 +27,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
+import android.speech.RecognizerIntent;
+import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -62,6 +65,9 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import java.util.ArrayList;
+import java.util.Locale;
+
 import edu.sfsu.csc780.chathub.ChatHeadService;
 import edu.sfsu.csc780.chathub.ChatHubApplication;
 import edu.sfsu.csc780.chathub.CodeablePreferences;
@@ -78,6 +84,7 @@ import static edu.sfsu.csc780.chathub.ImageUtil.scaleImage;
 public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_PICK_IMAGE = 1;
+    private static final int REQ_CODE_SPEECH_INPUT = 2;
     private ImageButton mImageButton;
     private static final String TAG = "MainActivity";
     public static final String MESSAGES_CHILD = "messages";
@@ -102,6 +109,7 @@ public class MainActivity extends AppCompatActivity {
     private ImageButton mLocationButton;
     private Context mContext;
     private ImageView mImageView;
+    private ImageButton mSpeechText;
 
     private static final int CODE_DRAW_OVER_OTHER_APP_PERMISSION = 2084;
 
@@ -215,6 +223,15 @@ public class MainActivity extends AppCompatActivity {
             public boolean onLongClick(View view) {
                 sendMessageOnClick(true);
                 return false;
+            }
+        });
+
+        mSpeechText = findViewById(R.id.speech_input);
+        mSpeechText.setVisibility(View.VISIBLE);
+        mSpeechText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                promptSpeechInput();
             }
         });
 
@@ -377,7 +394,14 @@ public class MainActivity extends AppCompatActivity {
                 finish();
             }
         }
-    }
+        if(requestCode == REQ_CODE_SPEECH_INPUT) {
+            if (resultCode == RESULT_OK && null != data) {
+
+                ArrayList<String> result = data
+                        .getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+                mMessageEditText.setText(result.get(0));
+            }
+    }   }
 
     private void createImageMessage(Uri uri) {
         if (uri == null) Log.e(TAG, "Could not create image message with null uri");
@@ -402,4 +426,18 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void promptSpeechInput() {
+        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
+        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, getString(R.string.voice_input_string));
+        try {
+            startActivityForResult(intent, REQ_CODE_SPEECH_INPUT);
+        } catch (ActivityNotFoundException a) {
+            Toast.makeText(getApplicationContext(),
+                    getString(R.string.speech_not_supported),
+                    Toast.LENGTH_SHORT).show();
+        }
+    }
 }
