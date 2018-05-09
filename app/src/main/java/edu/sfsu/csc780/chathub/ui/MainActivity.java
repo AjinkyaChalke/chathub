@@ -132,7 +132,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void initializeImageButton() {
         mImageButton = findViewById(R.id.shareImageButton);
-        if(Build.VERSION.SDK_INT >= 16){
+        if(Build.VERSION.SDK_INT >= 19){
             mImageButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
