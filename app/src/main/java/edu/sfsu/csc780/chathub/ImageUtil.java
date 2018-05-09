@@ -104,16 +104,16 @@ public class ImageUtil {
         );
     }
 
-    public static Uri saveWebpFile(Uri uri, Context context){
+    public static Uri saveCustomFile(Uri uri, Context context, String extension){
         File webpFile = null;
         try {
-            webpFile = createFile(context, ".webp");
+            webpFile = createFile(context, extension);
         }
         catch (IOException e) {
             e.printStackTrace();
         }
         if (webpFile == null) {
-            Log.d(TAG, "Error creating webp file");
+            Log.d(TAG, "Error creating "+extension+" file");
             return null;
         }
         try {

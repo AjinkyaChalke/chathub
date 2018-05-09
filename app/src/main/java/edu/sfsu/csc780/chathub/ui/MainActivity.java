@@ -73,8 +73,8 @@ import edu.sfsu.csc780.chathub.model.ChatMessage;
 import edu.sfsu.csc780.chathub.utils.Helpers;
 import edu.sfsu.csc780.chathub.utils.MessageUtil;
 
+import static edu.sfsu.csc780.chathub.ImageUtil.saveCustomFile;
 import static edu.sfsu.csc780.chathub.ImageUtil.savePhotoImage;
-import static edu.sfsu.csc780.chathub.ImageUtil.saveWebpFile;
 import static edu.sfsu.csc780.chathub.ImageUtil.scaleImage;
 
 public class MainActivity extends AppCompatActivity {
@@ -377,11 +377,8 @@ public class MainActivity extends AppCompatActivity {
                 String filePath = ImageUtil.getExtensionForUri(uri, this);
                 String extension = filePath.substring(filePath.lastIndexOf("."));
 
-                if(extension.equalsIgnoreCase(".webp")){
-                    uri = saveWebpFile(uri, this);
-                }
-                else if(extension.equalsIgnoreCase(".gif")){
-
+                if(extension.equalsIgnoreCase(".webp") || extension.equalsIgnoreCase(".gif")){
+                    uri = saveCustomFile(uri, this, extension.toLowerCase());
                 }
                 else {
                     // Resize if too big for messaging
