@@ -1,7 +1,6 @@
 package edu.sfsu.csc780.chathub.utils;
 
 import android.content.Context;
-import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
@@ -14,8 +13,6 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-
-import edu.sfsu.csc780.chathub.ui.MessageUtil;
 
 public class Helpers
     implements GoogleApiClient.OnConnectionFailedListener ,MessageUtil.MessageLoadListener{

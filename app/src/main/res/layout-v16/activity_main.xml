@@ -74,7 +74,7 @@
                 android:background="@drawable/button_ripple"
                 android:padding="5dp"
                 android:src="@drawable/ic_speech_input"
-                android:visibility="visible" />
+                android:visibility="gone" />
             <ImageButton
                 android:id="@+id/sendButton"
                 android:layout_width="wrap_content"

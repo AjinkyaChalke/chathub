@@ -1,15 +1,11 @@
 package edu.sfsu.csc780.chathub;
 
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.PixelFormat;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
-import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
@@ -20,7 +16,6 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -33,8 +28,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import edu.sfsu.csc780.chathub.model.ChatMessage;
-import edu.sfsu.csc780.chathub.ui.MainActivity;
-import edu.sfsu.csc780.chathub.ui.MessageUtil;
+import edu.sfsu.csc780.chathub.utils.MessageUtil;
 import edu.sfsu.csc780.chathub.ui.SignInActivity;
 import edu.sfsu.csc780.chathub.utils.Helpers;
 

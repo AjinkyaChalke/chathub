@@ -73,7 +73,7 @@
                 android:id="@+id/speech_input"
                 android:src="@drawable/ic_speech_input"
                 android:padding="5dp"
-                android:visibility="visible"/>
+                android:visibility="gone"/>
             <ImageButton
                 android:id="@+id/sendButton"
                 android:background="@drawable/button_ripple"
