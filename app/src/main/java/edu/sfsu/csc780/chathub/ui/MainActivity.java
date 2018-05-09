@@ -132,8 +132,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void initializeImageButton() {
         mImageButton = findViewById(R.id.shareImageButton);
-        if(Build.VERSION.SDK_INT >= 16){
+        if(Build.VERSION.SDK_INT >= 19){
             mImageButton.setOnClickListener(new View.OnClickListener() {
+                @RequiresApi(api = Build.VERSION_CODES.KITKAT)
                 @Override
                 public void onClick(View v) {
                 pickImage();
