@@ -1,8 +1,9 @@
 package edu.sfsu.csc780.chathub;
 
 import android.app.Application;
-import android.content.Context;
 import android.speech.tts.TextToSpeech;
+
+import com.facebook.drawee.backends.pipeline.Fresco;
 
 import java.util.Locale;
 
@@ -31,6 +32,8 @@ public class ChatHubApplication extends Application {
                 }
             }
         });
+        Fresco.initialize(this);
+
     }
 
     public static EncryptionHelper getEncryptionHelper() {

@@ -30,6 +30,7 @@ import android.provider.Settings;
 import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
@@ -79,6 +80,7 @@ import edu.sfsu.csc780.chathub.model.ChatMessage;
 import edu.sfsu.csc780.chathub.utils.Helpers;
 
 import static edu.sfsu.csc780.chathub.ImageUtil.savePhotoImage;
+import static edu.sfsu.csc780.chathub.ImageUtil.saveWebpFile;
 import static edu.sfsu.csc780.chathub.ImageUtil.scaleImage;
 
 public class MainActivity extends AppCompatActivity {
@@ -120,14 +122,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         initialize();
-
-        mImageButton = findViewById(R.id.shareImageButton);
-        mImageButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                pickImage();
-            }
-        });
+        initializeImageButton();
 
         mLocationButton = findViewById(R.id.locationButton);
         mLocationButton.setOnClickListener(new View.OnClickListener() {
@@ -139,6 +134,22 @@ public class MainActivity extends AppCompatActivity {
 
         stopChatHeadService();
 
+    }
+
+    private void initializeImageButton() {
+        mImageButton = findViewById(R.id.shareImageButton);
+        if(Build.VERSION.SDK_INT >= 16){
+            mImageButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                pickImage();
+                }
+            });
+            mImageButton.setVisibility(View.VISIBLE);
+        }
+        else {
+            mImageButton.setVisibility(View.GONE);
+        }
     }
 
     private void stopChatHeadService() {
@@ -347,12 +358,11 @@ public class MainActivity extends AppCompatActivity {
         finish();
     }
 
+
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     private void pickImage() {
-        // ACTION_OPEN_DOCUMENT is the intent to choose a file via the system's file browser
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-        // Filter to only show results that can be "opened"
         intent.addCategory(Intent.CATEGORY_OPENABLE);
-        // Filter to show only images, using the image MIME data type.
         intent.setType("image/*");
         startActivityForResult(intent, REQUEST_PICK_IMAGE);
     }
@@ -362,22 +372,33 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         Log.d(TAG, "onActivityResult: request=" + requestCode + ", result=" + resultCode);
         if (requestCode == REQUEST_PICK_IMAGE && resultCode == Activity.RESULT_OK) {
-            // Process selected image here
-            // The document selected by the user won't be returned in the intent.
-            // Instead, a URI to that document will be contained in the return intent
-            // provided to this method as a parameter.
-            // Pull that URI using resultData.getData().
             if (data != null) {
                 Uri uri = data.getData();
+                if(uri == null){
+                    Log.e(TAG, "Cannot get image for uploading");
+                    return;
+                }
                 Log.i(TAG, "Uri: " + uri.toString());
-                // Resize if too big for messaging
-                Bitmap bitmap = ImageUtil.getBitmapForUri(uri, this);
-                Bitmap resizedBitmap = scaleImage(bitmap);
-                if (bitmap != resizedBitmap) {
-                    uri = savePhotoImage(resizedBitmap, this);
+                String filePath = ImageUtil.getExtensionForUri(uri, this);
+                String extension = filePath.substring(filePath.lastIndexOf("."));
+
+                if(extension.equalsIgnoreCase(".webp")){
+                    uri = saveWebpFile(uri, this);
+                }
+                else if(extension.equalsIgnoreCase(".gif")){
+
+                }
+                else {
+                    // Resize if too big for messaging
+                    Bitmap bitmap = ImageUtil.getBitmapForUri(uri, this);
+                    Bitmap resizedBitmap = scaleImage(bitmap);
+                    if (bitmap != resizedBitmap) {
+                        uri = savePhotoImage(resizedBitmap, this);
+                    }
                 }
                 createImageMessage(uri);
-            } else {
+            }
+            else {
                 Log.e(TAG, "Cannot get image for uploading");
             }
         }

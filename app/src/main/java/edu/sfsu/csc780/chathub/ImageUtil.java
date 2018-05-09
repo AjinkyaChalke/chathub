@@ -1,6 +1,7 @@
 package edu.sfsu.csc780.chathub;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Environment;
@@ -8,11 +9,14 @@ import android.provider.MediaStore;
 import android.util.Log;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * Created by cjkriese on 3/2/18.
@@ -33,6 +37,24 @@ public class ImageUtil {
         return bitmap;
     }
 
+    public static String getExtensionForUri(Uri uri, Context context){
+        String fileName;
+        String[] filePathColumn = {MediaStore.MediaColumns.DISPLAY_NAME};
+        Cursor cursor = context.getContentResolver().query(uri, filePathColumn,
+                null, null, null);
+        if (cursor != null && cursor.moveToFirst()) {
+            int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+            fileName = cursor.getString(columnIndex);
+        }
+        else{
+            fileName = "";
+        }
+        if(cursor != null){
+            cursor.close();
+        }
+        return fileName;
+    }
+
     public static Bitmap scaleImage(Bitmap bitmap) {
         int originalHeight = bitmap.getHeight();
         int originalWidth = bitmap.getWidth();
@@ -50,7 +72,7 @@ public class ImageUtil {
     public static Uri savePhotoImage(Bitmap imageBitmap, Context context) {
         File photoFile = null;
         try {
-            photoFile = createImageFile(context);
+            photoFile = createFile(context, ".jpg");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -70,16 +92,54 @@ public class ImageUtil {
         return Uri.fromFile(photoFile);
     }
 
-    static File createImageFile(Context context) throws IOException {
+    static File createFile(Context context, String extension) throws IOException {
         // Create an image file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date());
+        String timeStamp = new SimpleDateFormat("yyyyMMdd-HHmmss", Locale.getDefault()).format(new Date());
         String imageFileNamePrefix = IMAGE_FILE_NAME_PREFIX + timeStamp;
         File storageDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        File imageFile = File.createTempFile(
+        return File.createTempFile(
                 imageFileNamePrefix, /* prefix */
-                ".jpg", /* suffix */
+                extension, /* suffix */
                 storageDir /* directory */
         );
-        return imageFile;
+    }
+
+    public static Uri saveWebpFile(Uri uri, Context context){
+        File webpFile = null;
+        try {
+            webpFile = createFile(context, ".webp");
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (webpFile == null) {
+            Log.d(TAG, "Error creating webp file");
+            return null;
+        }
+        try {
+
+
+            InputStream inputStream = context.getContentResolver().openInputStream(uri);
+            FileOutputStream fileOutputStream = new FileOutputStream(webpFile);
+            byte[] buffer = new byte[4 * 1024]; // or other buffer size
+            int read;
+
+            if (inputStream != null) {
+                while ((read = inputStream.read(buffer)) != -1) {
+                    fileOutputStream.write(buffer, 0, read);
+                }
+            }
+            if (inputStream != null) {
+                inputStream.close();
+            }
+            fileOutputStream.close();
+        }
+        catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+        return Uri.fromFile(webpFile);
     }
 }

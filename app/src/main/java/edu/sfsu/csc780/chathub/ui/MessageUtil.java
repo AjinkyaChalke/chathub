@@ -3,6 +3,7 @@ package edu.sfsu.csc780.chathub.ui;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.media.Image;
 import android.net.Uri;
 import android.os.Build;
 import android.speech.tts.TextToSpeech;
@@ -20,6 +21,9 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
+import com.facebook.drawee.backends.pipeline.Fresco;
+import com.facebook.drawee.interfaces.DraweeController;
+import com.facebook.drawee.view.SimpleDraweeView;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -58,7 +62,8 @@ public class MessageUtil{
 
         sAdapterListener = listener;
 
-        final FirebaseRecyclerAdapter adapter = new FirebaseRecyclerAdapter<ChatMessage,
+        final FirebaseRecyclerAdapter<ChatMessage, MessageUtil.MessageViewHolder> adapter
+                = new FirebaseRecyclerAdapter<ChatMessage,
                 MessageViewHolder>(
                 ChatMessage.class,
                 R.layout.item_message,
@@ -111,18 +116,10 @@ public class MessageUtil{
                     };
 
                     if(activity != null){
-                        Glide.with(activity)
-                                .load(chatMessage.getPhotoUrl())
-                                .asBitmap()
-                                .into(target);
-
+                        loadMediaInSimpleTarget(activity, chatMessage.getPhotoUrl(), target);
                     }
                     else {
-
-                        Glide.with(context)
-                                .load(chatMessage.getPhotoUrl())
-                                .asBitmap()
-                                .into(target);
+                        loadMediaInSimpleTarget(context, chatMessage.getPhotoUrl(), target);
                     }
 
                 }
@@ -137,16 +134,7 @@ public class MessageUtil{
                         gsReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                             @Override
                             public void onSuccess(Uri uri) {
-                                if(activity != null){
-                                    Glide.with(activity)
-                                            .load(uri)
-                                            .into(viewHolder.messageImageView);
-                                }
-                                else{
-                                    Glide.with(context)
-                                            .load(uri)
-                                            .into(viewHolder.messageImageView);
-                                }
+                                loadMediaInFrescoView(uri, viewHolder.messageImageView);
                             }
                         }).addOnFailureListener(new OnFailureListener() {
                             @Override
@@ -189,6 +177,25 @@ public class MessageUtil{
 
     }
 
+    private static void loadMediaInFrescoView(Uri uri, SimpleDraweeView simpleDraweeView){
+        DraweeController controller =
+                Fresco.newDraweeControllerBuilder()
+                        .setUri(uri)
+                        .setAutoPlayAnimations(true)
+                        .build();
+
+        simpleDraweeView.setController(controller);
+    }
+
+    private static void loadMediaInSimpleTarget(Context context, String uri,
+                                                SimpleTarget simpleTarget){
+        Glide.with(context)
+                .load(uri)
+                .asBitmap()
+                .into(simpleTarget);
+
+    }
+
     public static void send(ChatMessage chatMessage) {
 
         sFirebaseDatabaseReference.child(MESSAGES_CHILD).push().setValue(chatMessage);
@@ -206,7 +213,7 @@ public class MessageUtil{
         public TextView messageTextView;
         public TextView messengerTextView;
         public CircleImageView messengerImageView;
-        public ImageView messageImageView;
+        public SimpleDraweeView messageImageView;
         public TextView messageInformTextView;
         public MessageLoadListener messageLoadAdapterListener;
         public ImageButton mTextToSpeech;
@@ -243,3 +250,4 @@ public class MessageUtil{
                 .getLastPathSegment());
     }
 }
+
